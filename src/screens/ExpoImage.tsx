@@ -10,31 +10,45 @@ import * as ImagePicker from "expo-image-picker";
 import * as Sharing from "expo-sharing";
 import { useState } from "react";
 
-export default function ExpoImagePicker() {
+export default function ExpoImage() {
   const [image, setImage] = useState(null);
 
+
+  // handle picking image from gallery 
   const openImagePickerAsync = async () => {
     //   request permission
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
+    // permission denied
     if (!permission.granted) {
       alert(permission.status);
       return;
     }
+
+    // open gallery
     const pickerResult = await ImagePicker.launchImageLibraryAsync();
 
+    // nothing selected from gallery
     if (pickerResult.cancelled) {
       alert("Cancelled image picker");
     }
+
+    // selected from gallery
     setImage({ localUri: pickerResult.uri });
-    console.log(pickerResult);
   };
 
+
+  // handling clicking image from camera 
   const openImageCapture = async () => {
+    // request camera access permission 
     const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    // permission denied 
     if (!permission.granted) {
       alert(permission.status);
     }
+
+    // capture image from camera 
 
     const captureResult = await ImagePicker.launchCameraAsync();
 
@@ -45,11 +59,16 @@ export default function ExpoImagePicker() {
     setImage({ localUri: captureResult.uri });
   };
 
+
+  // handling image sharing 
   const openShareDialogAsync = async () => {
+
+    // web does not support sharing 
     if (Platform.OS === "web") {
       alert("Browser does not support sharing");
       return;
     }
+    // open share dialog 
 
     await Sharing.shareAsync(image.localUri);
   };
