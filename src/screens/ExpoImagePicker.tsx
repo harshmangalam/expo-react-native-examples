@@ -1,6 +1,15 @@
-import { Button, Image, View, StyleSheet } from "react-native";
+import {
+  Button,
+  Image,
+  View,
+  StyleSheet,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as Sharing from "expo-sharing";
 import { useState } from "react";
+
 export default function ExpoImagePicker() {
   const [image, setImage] = useState(null);
 
@@ -18,6 +27,7 @@ export default function ExpoImagePicker() {
       alert("Cancelled image picker");
     }
     setImage({ localUri: pickerResult.uri });
+    console.log(pickerResult);
   };
 
   const openImageCapture = async () => {
@@ -26,13 +36,22 @@ export default function ExpoImagePicker() {
       alert(permission.status);
     }
 
-    const captureResult = await ImagePicker.launchCameraAsync()
+    const captureResult = await ImagePicker.launchCameraAsync();
 
-    if(captureResult.cancelled){
-        alert("Cancelled camera capture")
+    if (captureResult.cancelled) {
+      alert("Cancelled camera capture");
     }
 
-    setImage({localUri:captureResult.uri})
+    setImage({ localUri: captureResult.uri });
+  };
+
+  const openShareDialogAsync = async () => {
+    if (Platform.OS === "web") {
+      alert("Browser does not support sharing");
+      return;
+    }
+
+    await Sharing.shareAsync(image.localUri);
   };
   return (
     <View>
@@ -40,11 +59,14 @@ export default function ExpoImagePicker() {
         <Button title="Pick Image" onPress={openImagePickerAsync} />
         <Button title="Capture Image" onPress={openImageCapture} />
       </View>
-      <View>
-        {image && (
-          <Image source={{ uri: image.localUri }} style={styles.thumbnail} />
-        )}
-      </View>
+
+      {image && (
+        <View>
+          <TouchableOpacity onPress={openShareDialogAsync}>
+            <Image source={{ uri: image.localUri }} style={styles.thumbnail} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
